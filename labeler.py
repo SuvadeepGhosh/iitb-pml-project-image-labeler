@@ -129,6 +129,17 @@ class CricketLabeler:
         # Load and Resize Image
         try:
             pil_img = Image.open(filepath)
+            
+            # Check dimensions
+            w, h = pil_img.size
+            if w < IMG_WIDTH or h < IMG_HEIGHT:
+                self.canvas.delete("all")
+                self.canvas.create_text(IMG_WIDTH/2, IMG_HEIGHT/2, text=f"REJECTED: Image too small ({w}x{h})\nMin required: {IMG_WIDTH}x{IMG_HEIGHT}", fill="red", font=("Arial", 24), anchor=tk.CENTER)
+                self.lbl_status.config(text=f"Image {self.current_img_index + 1}/{len(self.image_list)}: {self.current_image_name} [REJECTED]")
+                self.grid_data = [0] * 64 
+                self.current_pil_img = None 
+                return
+
             pil_img = pil_img.resize((IMG_WIDTH, IMG_HEIGHT), Image.Resampling.LANCZOS)
             self.current_pil_img = pil_img.convert("RGBA") # Keep reference for saving
             
@@ -204,6 +215,17 @@ class CricketLabeler:
         if not self.image_list:
             return
             
+        # Skip saving if image was rejected
+        if getattr(self, 'current_pil_img', None) is None:
+            print(f"Skipping rejected image: {self.current_image_name}")
+            # Move to next
+            if self.current_img_index < len(self.image_list) - 1:
+                self.current_img_index += 1
+                self.load_current_image()
+            else:
+                messagebox.showinfo("Done", "All images processed!")
+            return
+
         # Prepare Data Row
         row_dict = {
             "ImageFileName": self.current_image_name,

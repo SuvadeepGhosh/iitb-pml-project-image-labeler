@@ -71,6 +71,13 @@ def process_images():
         
         try:
             pil_img = Image.open(img_path)
+            
+            # Check dimensions
+            w, h = pil_img.size
+            if w < IMG_W or h < IMG_H:
+                print(f"SKIPPING {filename}: Resolution {w}x{h} too small (min {IMG_W}x{IMG_H})")
+                continue
+
             pil_img = pil_img.convert("RGB") 
             img = np.array(pil_img)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
