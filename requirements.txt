@@ -3,3 +3,5 @@ Pillow
 ultralytics
 opencv-python
 numpy
+requests
+beautifulsoup4
