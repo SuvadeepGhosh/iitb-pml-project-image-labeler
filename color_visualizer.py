@@ -5,8 +5,6 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from skimage.feature import hog
-from skimage import exposure
 
 # Configuration
 IMG_WIDTH = 800
@@ -14,10 +12,10 @@ IMG_HEIGHT = 600
 GRID_ROWS = 8
 GRID_COLS = 8
 
-class HOGVisualizer:
+class ColorVisualizer:
     def __init__(self, root):
         self.root = root
-        self.root.title("HOG Feature Visualizer")
+        self.root.title("Color Histogram Visualizer")
         
         # State
         self.current_pil_img = None
@@ -58,18 +56,15 @@ class HOGVisualizer:
         self.right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Matplotlib Figure
-        self.fig, self.axs = plt.subplots(3, 1, figsize=(5, 8))
+        self.fig, self.axs = plt.subplots(2, 1, figsize=(5, 8))
         self.fig.tight_layout(pad=3.0)
         
         self.axs[0].set_title("Selected Cell")
         self.axs[0].axis('off')
         
-        self.axs[1].set_title("HOG Visualization")
-        self.axs[1].axis('off')
-        
-        self.axs[2].set_title("HOG Feature Histogram")
-        self.axs[2].set_xlabel("Bin Index")
-        self.axs[2].set_ylabel("Value")
+        self.axs[1].set_title("RGB Color Histograms")
+        self.axs[1].set_xlabel("Pixel Value")
+        self.axs[1].set_ylabel("Frequency")
         
         self.chart = FigureCanvasTkAgg(self.fig, self.right_panel)
         self.chart.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -110,7 +105,6 @@ class HOGVisualizer:
             # Check dimensions (optional, but good for consistency)
             w, h = pil_img.size
             if w < IMG_WIDTH or h < IMG_HEIGHT:
-                # Just warn once or log? For now let's just resize silently or maybe print
                 print(f"Warning: {os.path.basename(filepath)} is small ({w}x{h})")
 
             pil_img = pil_img.resize((IMG_WIDTH, IMG_HEIGHT), Image.Resampling.LANCZOS)
@@ -127,10 +121,8 @@ class HOGVisualizer:
             for ax in self.axs:
                 ax.clear()
             self.axs[0].set_title("Selected Cell")
-            self.axs[1].set_title("HOG Visualization")
-            self.axs[2].set_title("HOG Feature Histogram")
+            self.axs[1].set_title("RGB Color Histograms")
             self.axs[0].axis('off')
-            self.axs[1].axis('off')
             self.chart.draw()
             
         except Exception as e:
@@ -185,16 +177,6 @@ class HOGVisualizer:
         cell_img = self.current_pil_img.crop((x1, y1, x2, y2))
         cell_array = np.array(cell_img)
         
-        # Compute HOG
-        # Using standard parameters, can be tweaked
-        # pixels_per_cell=(8, 8) means we get fine-grained features
-        # cells_per_block=(2, 2) for normalization
-        fd, hog_image = hog(cell_array, orientations=9, pixels_per_cell=(8, 8),
-                            cells_per_block=(2, 2), visualize=True, channel_axis=-1)
-        
-        # Rescale histogram for better display
-        hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))
-
         # Update Plots
         self.axs[0].clear()
         self.axs[0].imshow(cell_array)
@@ -202,14 +184,18 @@ class HOGVisualizer:
         self.axs[0].axis('off')
         
         self.axs[1].clear()
-        self.axs[1].imshow(hog_image_rescaled, cmap=plt.cm.gray)
-        self.axs[1].set_title("HOG Visualization")
-        self.axs[1].axis('off')
+        self.axs[1].set_title("RGB Color Histograms")
+        self.axs[1].set_xlabel("Pixel Value")
+        self.axs[1].set_ylabel("Frequency")
         
-        self.axs[2].clear()
-        self.axs[2].bar(range(len(fd)), fd)
-        self.axs[2].set_title(f"HOG Feature Vector (Size: {len(fd)})")
-        self.axs[2].set_xlim(0, len(fd))
+        # Plot Histograms
+        colors = ('red', 'green', 'blue')
+        for i, color in enumerate(colors):
+            hist, bins = np.histogram(cell_array[:, :, i], bins=256, range=(0, 256))
+            self.axs[1].plot(bins[:-1], hist, color=color, alpha=0.7, label=color.upper())
+            
+        self.axs[1].legend()
+        self.axs[1].set_xlim(0, 255)
         
         self.chart.draw()
         
@@ -219,7 +205,6 @@ class HOGVisualizer:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    # Set geometry to fit both panels
     root.geometry("1400x700")
-    app = HOGVisualizer(root)
+    app = ColorVisualizer(root)
     root.mainloop()
