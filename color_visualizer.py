@@ -194,7 +194,6 @@ class ColorVisualizer:
             hist, bins = np.histogram(cell_array[:, :, i], bins=256, range=(0, 256))
             self.axs[1].plot(bins[:-1], hist, color=color, alpha=0.7, label=color.upper())
             
-        self.axs[1].legend()
         self.axs[1].set_xlim(0, 255)
         
         self.chart.draw()
