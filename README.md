@@ -7,7 +7,7 @@ A simple tool to label cricket images with an 8x8 grid overlay.
 1.  **Images**: Place your raw cricket images (jpg, png, etc.) in the `raw_images` folder.
 2.  **Dependencies**: Ensure you have Python installed along with the required libraries:
     ```bash
-    pip install pandas Pillow
+    pip install -r requirements.txt
     ```
     (Note: `tkinter` is usually included with Python, but if you get an error, you may need to install it separately, e.g., `brew install python-tk` on Mac).
 
