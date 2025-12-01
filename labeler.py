@@ -268,6 +268,14 @@ class CricketLabeler:
                 y = i * cell_h
                 draw.line([(0, y), (IMG_WIDTH, y)], fill="yellow", width=1)
 
+            # Draw Cell Numbers
+            for i in range(64):
+                row = i // GRID_COLS
+                col = i % GRID_COLS
+                x = col * cell_w + 2
+                y = row * cell_h + 2
+                draw.text((x, y), str(i+1), fill="white")
+
             # Save to processed_images (convert back to RGB to remove alpha channel if saving as jpg)
             save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
             save_img.convert("RGB").save(save_path)

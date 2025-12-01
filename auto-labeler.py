@@ -142,6 +142,14 @@ def process_images():
         for i in range(1, ROWS):
             y = i * CELL_H
             cv2.line(img, (0, y), (IMG_W, y), (0, 255, 255), 1)
+
+        # Draw Cell Numbers
+        for i in range(64):
+            row = i // ROWS
+            col = i % COLS
+            x = int(col * CELL_W + 5)
+            y = int(row * CELL_H + 15)
+            cv2.putText(img, str(i+1), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
         
         # Save processed image
         save_path = os.path.join(PROCESSED_DIR, filename)
