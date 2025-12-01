@@ -5,3 +5,5 @@ opencv-python
 numpy
 requests
 beautifulsoup4
+selenium
+webdriver-manager
