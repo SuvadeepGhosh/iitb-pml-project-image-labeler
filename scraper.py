@@ -39,6 +39,8 @@ def scrape_images():
     print(f"Fetching {TARGET_URL}...")
     try:
         response = requests.get(TARGET_URL, headers=HEADERS)
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Headers: {response.headers}")
         response.raise_for_status()
     except Exception as e:
         print(f"Failed to fetch page: {e}")
