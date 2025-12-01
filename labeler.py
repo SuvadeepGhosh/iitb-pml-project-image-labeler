@@ -90,6 +90,9 @@ class CricketLabeler:
         
         btn_save = tk.Button(bottom_frame, text="Save & Next >>", command=self.save_and_next, bg="lightblue")
         btn_save.pack(side=tk.RIGHT)
+        
+        btn_skip = tk.Button(bottom_frame, text="Skip >>", command=self.skip_image)
+        btn_skip.pack(side=tk.RIGHT, padx=5)
 
         # Instructions
         lbl_instr = tk.Label(bottom_frame, text="Click grid cells to toggle: Ball(1) -> Bat(2) -> Stump(3)")
@@ -152,6 +155,18 @@ class CricketLabeler:
             
             # Reset grid data for new image
             self.grid_data = [0] * 64 
+            
+            # Load existing labels if available
+            if os.path.exists(OUTPUT_CSV):
+                try:
+                    df = pd.read_csv(OUTPUT_CSV)
+                    if self.current_image_name in df["ImageFileName"].values:
+                        row = df[df["ImageFileName"] == self.current_image_name].iloc[0]
+                        # Columns are c01, c02... c64
+                        self.grid_data = [row[f"c{i+1:02d}"] for i in range(64)]
+                        print(f"Loaded existing labels for {self.current_image_name}")
+                except Exception as e:
+                    print(f"Error loading existing labels: {e}") 
             
             self.draw_grid()
             self.lbl_status.config(text=f"Image {self.current_img_index + 1}/{len(self.image_list)}: {self.current_image_name}")
@@ -327,6 +342,13 @@ class CricketLabeler:
         if self.current_img_index > 0:
             self.current_img_index -= 1
             self.load_current_image()
+
+    def skip_image(self):
+        if self.current_img_index < len(self.image_list) - 1:
+            self.current_img_index += 1
+            self.load_current_image()
+        else:
+            messagebox.showinfo("Done", "All images processed!")
 
 if __name__ == "__main__":
     root = tk.Tk()
