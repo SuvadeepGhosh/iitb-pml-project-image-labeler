@@ -285,11 +285,34 @@ class CricketLabeler:
 
         # Append to CSV
         
-        # Append to CSV
-        if not os.path.exists(OUTPUT_CSV):
-            df_new.to_csv(OUTPUT_CSV, index=False)
+        # Update or Append to CSV
+        if os.path.exists(OUTPUT_CSV):
+            try:
+                df = pd.read_csv(OUTPUT_CSV)
+                
+                # Check if image already exists
+                if self.current_image_name in df["ImageFileName"].values:
+                    print(f"Updating existing entry for {self.current_image_name}")
+                    # Update existing row
+                    # We need to ensure we update all columns
+                    for col, val in row_dict.items():
+                        df.loc[df["ImageFileName"] == self.current_image_name, col] = val
+                else:
+                    # Append new row
+                    df_new = pd.DataFrame([row_dict])
+                    df = pd.concat([df, df_new], ignore_index=True)
+                
+                df.to_csv(OUTPUT_CSV, index=False)
+                
+            except Exception as e:
+                print(f"Error reading/writing CSV: {e}")
+                # Fallback to append if read fails (e.g. empty file)
+                df_new = pd.DataFrame([row_dict])
+                df_new.to_csv(OUTPUT_CSV, mode='a', header=False, index=False)
         else:
-            df_new.to_csv(OUTPUT_CSV, mode='a', header=False, index=False)
+            # Create new file
+            df_new = pd.DataFrame([row_dict])
+            df_new.to_csv(OUTPUT_CSV, index=False)
             
         print(f"Saved {self.current_image_name}")
         
