@@ -56,8 +56,13 @@ class CricketLabeler:
         }
         
         for key, rgb in rgb_map.items():
-            img = Image.new("RGBA", (cell_w, cell_h), rgb + (alpha,))
-            self.overlay_images[key] = ImageTk.PhotoImage(img)
+            # Create PIL Image for saving later
+            pil_overlay = Image.new("RGBA", (cell_w, cell_h), rgb + (alpha,))
+            self.overlay_images_pil = self.overlay_images_pil if hasattr(self, 'overlay_images_pil') else {}
+            self.overlay_images_pil[key] = pil_overlay
+            
+            # Create PhotoImage for UI
+            self.overlay_images[key] = ImageTk.PhotoImage(pil_overlay)
 
         
     def setup_ui(self):
@@ -125,6 +130,7 @@ class CricketLabeler:
         try:
             pil_img = Image.open(filepath)
             pil_img = pil_img.resize((IMG_WIDTH, IMG_HEIGHT), Image.Resampling.LANCZOS)
+            self.current_pil_img = pil_img.convert("RGBA") # Keep reference for saving
             
             # Save resized version to processed_images
             save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
@@ -210,6 +216,33 @@ class CricketLabeler:
             row_dict[col_name] = self.grid_data[i]
             
         df_new = pd.DataFrame([row_dict])
+        
+        # --- SAVE VISUALIZED IMAGE ---
+        try:
+            # Create a copy of the base image to draw on
+            save_img = self.current_pil_img.copy()
+            
+            cell_w = int(IMG_WIDTH / GRID_COLS)
+            cell_h = int(IMG_HEIGHT / GRID_ROWS)
+            
+            for idx, val in enumerate(self.grid_data):
+                if val != 0 and val in self.overlay_images_pil:
+                    row = idx // GRID_COLS
+                    col = idx % GRID_COLS
+                    x = col * cell_w
+                    y = row * cell_h
+                    
+                    # Paste the overlay
+                    save_img.paste(self.overlay_images_pil[val], (x, y), self.overlay_images_pil[val])
+            
+            # Save to processed_images (convert back to RGB to remove alpha channel if saving as jpg)
+            save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
+            save_img.convert("RGB").save(save_path)
+            
+        except Exception as e:
+            print(f"Error saving visualized image: {e}")
+
+        # Append to CSV
         
         # Append to CSV
         if not os.path.exists(OUTPUT_CSV):
