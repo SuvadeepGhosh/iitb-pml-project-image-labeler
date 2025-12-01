@@ -127,6 +127,15 @@ def process_images():
         # Blend overlay with original image
         cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
         
+        # Draw Grid Lines
+        for i in range(1, COLS):
+            x = i * CELL_W
+            cv2.line(img, (x, 0), (x, IMG_H), (0, 255, 255), 1)
+            
+        for i in range(1, ROWS):
+            y = i * CELL_H
+            cv2.line(img, (0, y), (IMG_W, y), (0, 255, 255), 1)
+        
         # Save processed image
         save_path = os.path.join(PROCESSED_DIR, filename)
         cv2.imwrite(save_path, img)

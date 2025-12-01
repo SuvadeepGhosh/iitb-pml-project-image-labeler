@@ -235,6 +235,17 @@ class CricketLabeler:
                     # Paste the overlay
                     save_img.paste(self.overlay_images_pil[val], (x, y), self.overlay_images_pil[val])
             
+            # Draw Grid Lines
+            draw = ImageDraw.Draw(save_img)
+            # Vertical
+            for i in range(1, GRID_COLS):
+                x = i * cell_w
+                draw.line([(x, 0), (x, IMG_HEIGHT)], fill="yellow", width=1)
+            # Horizontal
+            for i in range(1, GRID_ROWS):
+                y = i * cell_h
+                draw.line([(0, y), (IMG_WIDTH, y)], fill="yellow", width=1)
+
             # Save to processed_images (convert back to RGB to remove alpha channel if saving as jpg)
             save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
             save_img.convert("RGB").save(save_path)
