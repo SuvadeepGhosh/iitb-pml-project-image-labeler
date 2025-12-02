@@ -73,33 +73,28 @@ def extract_features():
                 cell_gray = img_gray[y1:y2, x1:x2]
                 
                 # --- 1. HOG Features ---
-                # Using fewer pixels per cell to get a reasonable vector size
-                # 8x8 pixels per cell, 2x2 cells per block, 9 orientations
-                # Cell size is 100x75. 
-                # 100/8 = 12, 75/8 = 9. Blocks approx (11, 8). Vector size ~ 11*8*2*2*9 = 3168 (large!)
-                # Let's increase pixels_per_cell to reduce vector size for this CSV
-                # 16x16 pixels -> 6x4 blocks. Vector ~ 5*3*4*9 = 540. More manageable.
-                fd_hog = hog(cell_gray, orientations=9, pixels_per_cell=(16, 16),
+                # Using standard 8x8 pixels per cell for full feature vector
+                fd_hog = hog(cell_gray, orientations=9, pixels_per_cell=(8, 8),
                              cells_per_block=(2, 2), visualize=False, channel_axis=None)
                 
                 # --- 2. Color Histogram Features ---
-                # 8 bins per channel -> 24 features
-                hist_r, _ = np.histogram(cell_rgb[:, :, 0], bins=8, range=(0, 256), density=True)
-                hist_g, _ = np.histogram(cell_rgb[:, :, 1], bins=8, range=(0, 256), density=True)
-                hist_b, _ = np.histogram(cell_rgb[:, :, 2], bins=8, range=(0, 256), density=True)
+                # 32 bins per channel -> 96 features
+                hist_r, _ = np.histogram(cell_rgb[:, :, 0], bins=32, range=(0, 256), density=True)
+                hist_g, _ = np.histogram(cell_rgb[:, :, 1], bins=32, range=(0, 256), density=True)
+                hist_b, _ = np.histogram(cell_rgb[:, :, 2], bins=32, range=(0, 256), density=True)
                 color_feats = np.concatenate([hist_r, hist_g, hist_b])
                 
                 # --- 3. Convolution Features ---
-                # Apply kernels and take Mean and Variance
+                # Apply kernels and take Histogram (16 bins) instead of just Mean/Var
                 conv_edge = cv2.filter2D(cell_gray, -1, kernel_edge)
                 conv_sharpen = cv2.filter2D(cell_gray, -1, kernel_sharpen)
                 conv_blur = cv2.filter2D(cell_gray, -1, kernel_blur)
                 
-                conv_feats = [
-                    np.mean(conv_edge), np.var(conv_edge),
-                    np.mean(conv_sharpen), np.var(conv_sharpen),
-                    np.mean(conv_blur), np.var(conv_blur)
-                ]
+                hist_edge, _ = np.histogram(conv_edge, bins=16, range=(0, 256), density=True)
+                hist_sharpen, _ = np.histogram(conv_sharpen, bins=16, range=(0, 256), density=True)
+                hist_blur, _ = np.histogram(conv_blur, bins=16, range=(0, 256), density=True)
+                
+                conv_feats = np.concatenate([hist_edge, hist_sharpen, hist_blur])
                 
                 # --- 4. Shape Features ---
                 # Canny
@@ -133,12 +128,8 @@ def extract_features():
                     feature_row[f"Color_{j}"] = val
                     
                 # Add Conv
-                feature_row["Conv_Edge_Mean"] = conv_feats[0]
-                feature_row["Conv_Edge_Var"] = conv_feats[1]
-                feature_row["Conv_Sharpen_Mean"] = conv_feats[2]
-                feature_row["Conv_Sharpen_Var"] = conv_feats[3]
-                feature_row["Conv_Blur_Mean"] = conv_feats[4]
-                feature_row["Conv_Blur_Var"] = conv_feats[5]
+                for j, val in enumerate(conv_feats):
+                    feature_row[f"Conv_{j}"] = val
                 
                 # Add Shape
                 feature_row["Shape_Lines"] = shape_feats[0]
