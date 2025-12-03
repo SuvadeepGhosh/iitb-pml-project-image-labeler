@@ -11,8 +11,8 @@ from skimage import exposure
 # Configuration
 IMG_WIDTH = 800
 IMG_HEIGHT = 600
-GRID_ROWS = 8
-GRID_COLS = 8
+GRID_ROWS = 4
+GRID_COLS = 4
 
 class HOGVisualizer:
     def __init__(self, root):

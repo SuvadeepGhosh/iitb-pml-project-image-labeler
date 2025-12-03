@@ -4,3 +4,8 @@ __pycache__/
 raw_images/
 processed_images/
 labels.csv
+venv/
+.ipynb_checkpoints/
+*.ipynb
+*.pt
+*.csv

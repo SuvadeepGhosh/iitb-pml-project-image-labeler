@@ -9,7 +9,7 @@ GRID_ROWS = 8
 GRID_COLS = 8
 IMG_WIDTH = 800
 IMG_HEIGHT = 600
-OUTPUT_CSV = "labels.csv"
+OUTPUT_CSV = "labels1.csv"
 PROCESSED_DIR = "processed_images"
 
 # Color mapping for visual feedback

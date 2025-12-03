@@ -10,7 +10,7 @@ import requests
 # Configuration
 TARGET_URL = "https://www.espncricinfo.com/photo"
 SAVE_DIR = "raw_images"
-MAX_IMAGES = 10
+MAX_IMAGES = 350
 SCROLL_PAUSE_TIME = 2
 
 def scrape_images():
