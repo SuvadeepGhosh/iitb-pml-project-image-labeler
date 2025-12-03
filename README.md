@@ -58,6 +58,7 @@ Generates the final dataset for machine learning.
 
 ## Output Files
 
-*   **`labels.csv`**: Ground truth labels (0=None, 1=Ball, 2=Bat, 3=Stump).
+*   **`labels1.csv` / `auto_labels.csv`**: Ground truth labels.
 *   **`features.csv`**: The feature matrix for training ML models.
-*   **`processed_images/`**: Resized (800x600) images with grid overlays.
+*   **`Processed_image/`**: Clean, resized (800x600) images used for training.
+*   **`Reference_Images/`**: Images with grid overlays, cell numbers, and labels for visual verification.

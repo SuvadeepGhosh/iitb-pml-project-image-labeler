@@ -9,8 +9,10 @@ GRID_ROWS = 8
 GRID_COLS = 8
 IMG_WIDTH = 800
 IMG_HEIGHT = 600
+OUTPUT_CSV = "labels.csv"
 OUTPUT_CSV = "labels1.csv"
-PROCESSED_DIR = "processed_images"
+CLEAN_DIR = "Processed_image"
+REFERENCE_DIR = "Reference_Images"
 
 # Color mapping for visual feedback
 # 0: None, 1: Ball, 2: Bat, 3: Stump
@@ -35,8 +37,11 @@ class CricketLabeler:
         self.current_image_name = ""
         
         # Ensure processed directory exists
-        if not os.path.exists(PROCESSED_DIR):
-            os.makedirs(PROCESSED_DIR)
+        # Ensure processed directories exist
+        if not os.path.exists(CLEAN_DIR):
+            os.makedirs(CLEAN_DIR)
+        if not os.path.exists(REFERENCE_DIR):
+            os.makedirs(REFERENCE_DIR)
 
         # UI Setup
         self.setup_ui()
@@ -320,8 +325,13 @@ class CricketLabeler:
                 draw.text((x, y), str(i+1), fill="white")
 
             # Save to processed_images (convert back to RGB to remove alpha channel if saving as jpg)
-            save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
-            save_img.convert("RGB").save(save_path)
+            # Save CLEAN image (resized, no overlay) to Processed_image
+            clean_save_path = os.path.join(CLEAN_DIR, self.current_image_name)
+            self.current_pil_img.convert("RGB").save(clean_save_path)
+
+            # Save REFERENCE image (with overlay) to Reference_Images
+            ref_save_path = os.path.join(REFERENCE_DIR, self.current_image_name)
+            save_img.convert("RGB").save(ref_save_path)
             
         except Exception as e:
             print(f"Error saving visualized image: {e}")

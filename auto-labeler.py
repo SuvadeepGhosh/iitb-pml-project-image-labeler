@@ -9,7 +9,9 @@ from PIL import Image
 # --- CONFIGURATION ---
 IMAGE_FOLDER = "raw_images"
 OUTPUT_CSV = "auto_labels.csv"
-PROCESSED_DIR = "processed_images"
+OUTPUT_CSV = "auto_labels.csv"
+CLEAN_DIR = "Processed_image"
+REFERENCE_DIR = "Reference_Images"
 CONFIDENCE_THRESHOLD = 0.15
 IOU_THRESHOLD = 0.15
 
@@ -45,8 +47,11 @@ def get_intersection_area(boxA, boxB):
 
 def process_images():
     # Ensure processed directory exists
-    if not os.path.exists(PROCESSED_DIR):
-        os.makedirs(PROCESSED_DIR)
+    # Ensure processed directories exist
+    if not os.path.exists(CLEAN_DIR):
+        os.makedirs(CLEAN_DIR)
+    if not os.path.exists(REFERENCE_DIR):
+        os.makedirs(REFERENCE_DIR)
 
     # 1. Load YOLO-World
     print("Loading YOLO-World model...")
@@ -87,6 +92,10 @@ def process_images():
             
         # Resize
         img = cv2.resize(img, (IMG_W, IMG_H))
+        
+        # Save CLEAN image (resized, no overlay) to Processed_image
+        clean_save_path = os.path.join(CLEAN_DIR, filename)
+        cv2.imwrite(clean_save_path, img)
         
         # Run Inference
         results = model.predict(img, conf=CONFIDENCE_THRESHOLD, verbose=False)
@@ -151,9 +160,9 @@ def process_images():
             y = int(row * CELL_H + 15)
             cv2.putText(img, str(i+1), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
         
-        # Save processed image
-        save_path = os.path.join(PROCESSED_DIR, filename)
-        cv2.imwrite(save_path, img)
+        # Save Reference Image (with overlay)
+        ref_save_path = os.path.join(REFERENCE_DIR, filename)
+        cv2.imwrite(ref_save_path, img)
 
         # Save Row
         row_dict = {
