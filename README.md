@@ -1,36 +1,63 @@
-# Cricket Image Labeler
+# Cricket Image Labeler & Feature Extraction Suite
 
-A simple tool to label cricket images with an 8x8 grid overlay.
+A comprehensive toolkit for labeling cricket images, visualizing computer vision features, and extracting datasets for machine learning.
 
 ## Setup
 
 1.  **Images**: Place your raw cricket images (jpg, png, etc.) in the `raw_images` folder.
-2.  **Dependencies**: Ensure you have Python installed along with the required libraries:
+2.  **Dependencies**: Install the required Python libraries:
     ```bash
     pip install -r requirements.txt
     ```
-    (Note: `tkinter` is usually included with Python, but if you get an error, you may need to install it separately, e.g., `brew install python-tk` on Mac).
+    *(Note: `tkinter` is required for the GUI tools. It is usually included with Python, but on some systems like Mac, you might need `brew install python-tk`)*.
 
-## Usage
+## Tools Overview
 
-1.  Run the tool:
-    ```bash
-    python3 labeler.py
-    ```
-2.  Click **"Load Images Folder"**. It defaults to `raw_images`.
-3.  **Labeling**:
-    *   Click on grid cells to toggle the label:
-        *   **Red**: Ball
-        *   **Blue**: Bat
-        *   **Green**: Stump
-        *   (Click again to clear)
-4.  **Navigation**:
-    *   Click **"Save & Next >>"** to save the labels to `labels.csv` and move to the next image.
-    *   The tool automatically resizes images to 800x600 and saves a copy in `processed_images`.
+### 1. Image Labeler (`labeler.py`)
+The primary tool for manually labeling images.
+*   **Usage**: `python3 labeler.py`
+*   **Features**:
+    *   Loads images from `raw_images`.
+    *   Displays an 8x8 grid (configurable).
+    *   **Click to Label**: Red (Ball), Blue (Bat), Green (Stump).
+    *   **Skip**: Skip images without saving.
+    *   **Save & Next**: Saves labels to `labels.csv` and processed images to `processed_images/`.
+    *   **Resume**: Automatically loads existing labels if an image was previously processed.
 
-## Output
+### 2. Auto Labeler (`auto-labeler.py`)
+Uses YOLO-World to automatically detect objects and generate labels.
+*   **Usage**: `python3 auto-labeler.py`
+*   **Output**: Generates `auto_labels.csv` and visualized images.
 
-*   **`labels.csv`**: Contains the labels for each image.
-    *   Format: `ImageFileName, TrainOrTest, c01, c02, ..., c64`
-    *   Values: 0 (None), 1 (Ball), 2 (Bat), 3 (Stump)
-*   **`processed_images/`**: Contains the resized (800x600) images corresponding to the labels.
+### 3. Image Scraper (`scraper.py`)
+A Selenium-based scraper to download cricket images from the web.
+*   **Usage**: `python3 scraper.py`
+*   **Note**: Requires Chrome/Chromium.
+
+### 4. Feature Visualizers
+A suite of tools to inspect computer vision features for individual grid cells. All tools support folder navigation.
+
+*   **HOG Visualizer** (`hog_visualizer.py`):
+    *   Visualizes Histogram of Oriented Gradients (HOG) for texture/shape analysis.
+*   **Color Visualizer** (`color_visualizer.py`):
+    *   Displays RGB histograms to analyze color distribution.
+*   **Convolution Visualizer** (`convolution_visualizer.py`):
+    *   Shows the effect of Edge Detection, Sharpening, and Box Blur kernels.
+*   **Shape Visualizer** (`shape_visualizer.py`):
+    *   Visualizes Canny Edges, Hough Lines (for bats/stumps), and Hough Circles (for balls).
+*   **Feature Comparison** (`feature_comparison_visualizer.py`):
+    *   **All-in-one tool**: Side-by-side comparison of HOG and Color features across Original, Edge, Sharpen, and Blur versions of a cell.
+
+### 5. Feature Extractor (`feature_extractor.py`)
+Generates the final dataset for machine learning.
+*   **Usage**: `python3 feature_extractor.py`
+*   **Input**: Reads `labels.csv` and processed images.
+*   **Output**: Saves `features.csv` containing high-dimensional feature vectors for every cell.
+    *   **Features**: HOG (8x8 cells), Color Histograms (32 bins), Convolution Histograms (16 bins), Shape Counts.
+    *   **Dimensions**: ~3,314 features per cell.
+
+## Output Files
+
+*   **`labels.csv`**: Ground truth labels (0=None, 1=Ball, 2=Bat, 3=Stump).
+*   **`features.csv`**: The feature matrix for training ML models.
+*   **`processed_images/`**: Resized (800x600) images with grid overlays.
