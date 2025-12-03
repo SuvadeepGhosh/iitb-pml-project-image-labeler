@@ -66,8 +66,34 @@ class CricketLabeler:
 
         
     def setup_ui(self):
+        # Create a main container with scrollbar
+        main_container = tk.Frame(self.root)
+        main_container.pack(fill=tk.BOTH, expand=True)
+
+        # Canvas for scrolling
+        self.main_scroll_canvas = tk.Canvas(main_container)
+        scrollbar = tk.Scrollbar(main_container, orient="vertical", command=self.main_scroll_canvas.yview)
+        
+        # Frame inside canvas
+        self.scrollable_frame = tk.Frame(self.main_scroll_canvas)
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.main_scroll_canvas.configure(
+                scrollregion=self.main_scroll_canvas.bbox("all")
+            )
+        )
+
+        self.main_scroll_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.main_scroll_canvas.configure(yscrollcommand=scrollbar.set)
+
+        self.main_scroll_canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # --- UI Elements inside scrollable_frame ---
+        
         # Top Control Panel
-        control_frame = tk.Frame(self.root)
+        control_frame = tk.Frame(self.scrollable_frame)
         control_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
         
         btn_load = tk.Button(control_frame, text="Load Images Folder", command=self.load_folder)
@@ -77,12 +103,12 @@ class CricketLabeler:
         self.lbl_status.pack(side=tk.LEFT, padx=10)
         
         # Main Canvas for Image
-        self.canvas = tk.Canvas(self.root, width=IMG_WIDTH, height=IMG_HEIGHT, bg="grey")
+        self.canvas = tk.Canvas(self.scrollable_frame, width=IMG_WIDTH, height=IMG_HEIGHT, bg="grey")
         self.canvas.pack(padx=10, pady=10)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
         
         # Bottom Control Panel
-        bottom_frame = tk.Frame(self.root)
+        bottom_frame = tk.Frame(self.scrollable_frame)
         bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
         
         btn_prev = tk.Button(bottom_frame, text="<< Previous", command=self.prev_image)
@@ -97,6 +123,12 @@ class CricketLabeler:
         # Instructions
         lbl_instr = tk.Label(bottom_frame, text="Click grid cells to toggle: Ball(1) -> Bat(2) -> Stump(3)")
         lbl_instr.pack(side=tk.TOP)
+        
+        # Bind mousewheel
+        self.main_scroll_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _on_mousewheel(self, event):
+        self.main_scroll_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def load_folder(self):
         initial_dir = os.path.join(os.getcwd(), "raw_images")
@@ -145,10 +177,6 @@ class CricketLabeler:
 
             pil_img = pil_img.resize((IMG_WIDTH, IMG_HEIGHT), Image.Resampling.LANCZOS)
             self.current_pil_img = pil_img.convert("RGBA") # Keep reference for saving
-            
-            # Save resized version to processed_images
-            save_path = os.path.join(PROCESSED_DIR, self.current_image_name)
-            pil_img.save(save_path)
             
             self.tk_img = ImageTk.PhotoImage(pil_img)
             self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_img)
