@@ -10,8 +10,8 @@ from PIL import Image
 IMAGE_FOLDER = "raw_images"
 OUTPUT_CSV = "auto_labels.csv"
 OUTPUT_CSV = "auto_labels.csv"
-CLEAN_DIR = "Processed_image"
-REFERENCE_DIR = "Reference_Images"
+CLEAN_DIR = "processed_images"
+REFERENCE_DIR = "labeled_images"
 CONFIDENCE_THRESHOLD = 0.15
 IOU_THRESHOLD = 0.15
 

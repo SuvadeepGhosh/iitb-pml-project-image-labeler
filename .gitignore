@@ -3,9 +3,10 @@ __pycache__/
 .DS_Store
 raw_images/
 
-labels.csv
 venv/
 .ipynb_checkpoints/
 *.ipynb
 *.pt
+processed_images/
+labeled_images/
 *.csv

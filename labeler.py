@@ -10,9 +10,8 @@ GRID_COLS = 8
 IMG_WIDTH = 800
 IMG_HEIGHT = 600
 OUTPUT_CSV = "labels.csv"
-OUTPUT_CSV = "labels1.csv"
-CLEAN_DIR = "Processed_image"
-REFERENCE_DIR = "Reference_Images"
+CLEAN_DIR = "processed_images"
+REFERENCE_DIR = "labeled_images"
 
 # Color mapping for visual feedback
 # 0: None, 1: Ball, 2: Bat, 3: Stump

@@ -21,7 +21,7 @@ The primary tool for manually labeling images.
     *   Displays an 8x8 grid (configurable).
     *   **Click to Label**: Red (Ball), Blue (Bat), Green (Stump).
     *   **Skip**: Skip images without saving.
-    *   **Save & Next**: Saves labels to `labels.csv` and processed images to `processed_images/`.
+    *   **Save & Next**: Saves labels to `labels.csv`, clean images to `processed_images/`, and overlaid images to `labeled_images/`.
     *   **Resume**: Automatically loads existing labels if an image was previously processed.
 
 ### 2. Auto Labeler (`auto-labeler.py`)
@@ -58,7 +58,7 @@ Generates the final dataset for machine learning.
 
 ## Output Files
 
-*   **`labels1.csv` / `auto_labels.csv`**: Ground truth labels.
+*   **`labels.csv` / `auto_labels.csv`**: Ground truth labels.
 *   **`features.csv`**: The feature matrix for training ML models.
-*   **`Processed_image/`**: Clean, resized (800x600) images used for training.
-*   **`Reference_Images/`**: Images with grid overlays, cell numbers, and labels for visual verification.
+*   **`processed_images/`**: Clean, resized (800x600) images used for training.
+*   **`labeled_images/`**: Images with grid overlays, cell numbers, and labels for visual verification.
