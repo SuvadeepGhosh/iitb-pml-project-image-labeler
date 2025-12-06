@@ -9,3 +9,6 @@ scikit-image
 selenium
 ultralytics
 webdriver-manager
+scikit-learn
+seaborn
+imbalanced-learn
